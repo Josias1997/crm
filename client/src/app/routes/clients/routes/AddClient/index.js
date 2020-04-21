@@ -15,9 +15,7 @@ import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
 import MomentUtils from '@date-io/moment';
 import {
-  MuiPickersUtilsProvider,
-  KeyboardTimePicker,
-  KeyboardDatePicker,
+  DatePicker,
 } from '@material-ui/pickers';
 import axios from './../../../../../util/instanceAxios';
 
@@ -65,6 +63,12 @@ class Add extends React.Component {
         });
       });
     }
+    handleDateChange = (date) => {
+      console.log(date);
+      this.setState({
+        date_reglement: date
+      })
+    }
 
   render() {
     return (
@@ -93,19 +97,16 @@ class Add extends React.Component {
                     }}
                     onChange={(event) => this.handleChange(event, 'email')}
                 />
-                <MuiPickersUtilsProvider utils={MomentUtils}>
-                  <KeyboardDatePicker
-                    margin="normal"
-                    id="date-picker-dialog"
-                    label="Date picker dialog"
-                    format="MM/dd/yyyy"
-                    value={new Date()}
-                    onChange={(event) => this.handleChange(event, 'date_reglement')}
-                    KeyboardButtonProps={{
-                      'aria-label': 'change date',
-                    }}
-                  />
-                </MuiPickersUtilsProvider>
+                <DatePicker
+                  margin="normal"
+                  id="date-picker-dialog"
+                  label="Date règlement"
+                  value={this.date_reglement}
+                  onChange={this.handleDateChange}
+                  KeyboardButtonProps={{
+                    'aria-label': 'change date',
+                  }}
+                />
                 <div className="col-lg-12 col-sm-12 col-12">
                     <FormControl className="w-100 mb-2">
                         <InputLabel htmlFor="age-simple">Périodicité</InputLabel>
