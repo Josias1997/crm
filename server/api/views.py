@@ -239,8 +239,17 @@ def update_iban(request):
             'message': 'Vos informations ont déjà été prises en compte'
         })
     
-            
-        
+
+@api_view(['POST'])
+def update_price(request, token):
+    client = Client.objects.get(token=token)
+    new_price = request.data['price']
+    client.montant = int(new_price) 
+    client.save()
+    stripe.Plan.update(client.plan_id)    
+ 
+
+
 @csrf_exempt
 @api_view(['POST'])
 def webhooks_view(request):
