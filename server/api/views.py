@@ -48,7 +48,7 @@ def add_client(request):
     client = Client(societe=societe, email=email, date_reglement=date_reglement, periodicite=periodicite, montant=montant,
     mode_de_reglement=mode_de_reglement, statut=statut, statut_client=statut_client)
     client.save()
-    send_url_to_client(generate_client_url(client.societe, client.id, client.token))
+    send_url_to_client(generate_client_url(client.societe, client.id, client.token), client.email)
     return Response({
         'id': client.id,
         'societe': client.societe,
