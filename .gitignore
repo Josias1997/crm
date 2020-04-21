@@ -23,3 +23,5 @@
 /client/yarn.lock
 
 /server/venv
+/server/db.sqlite3
+/server/db.json

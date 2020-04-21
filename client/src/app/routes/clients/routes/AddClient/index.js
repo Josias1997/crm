@@ -13,7 +13,7 @@ import Radio from '@material-ui/core/Radio';
 import RadioGroup from '@material-ui/core/RadioGroup';
 import Button from '@material-ui/core/Button';
 import CircularProgress from '@material-ui/core/CircularProgress';
-import DateFnsUtils from '@date-io/date-fns';
+import MomentUtils from '@date-io/moment';
 import {
   MuiPickersUtilsProvider,
   KeyboardTimePicker,
@@ -93,7 +93,7 @@ class Add extends React.Component {
                     }}
                     onChange={(event) => this.handleChange(event, 'email')}
                 />
-                <MuiPickersUtilsProvider utils={DateFnsUtils}>
+                <MuiPickersUtilsProvider utils={MomentUtils}>
                   <KeyboardDatePicker
                     margin="normal"
                     id="date-picker-dialog"
