@@ -1,17 +1,16 @@
 from django.shortcuts import render
 from django.conf import settings
-from django.http import HttpResponse
 from rest_framework.decorators import api_view, parser_classes
 from rest_framework.parsers import MultiPartParser, FormParser
-from .models import Client
+from api.models import Client
 from rest_framework.response import Response
-from .helpers import generate_client_url, send_url_to_client
+from api.helpers import generate_client_url, send_url_to_client
 import stripe
 from datetime import datetime
 from django.core.serializers import serialize
-from django.views.decorators.csrf import csrf_exempt
 from django.db.models import Q
-import json
+
+
 
 stripe.api_key = settings.SECRET_API_KEY
 product = stripe.Product.retrieve(settings.PRODUCT_ID)
@@ -246,55 +245,8 @@ def update_price(request, token):
     new_price = request.data['price']
     client.montant = int(new_price) 
     client.save()
-    stripe.Plan.update(client.plan_id)    
- 
-
-
-@csrf_exempt
-@api_view(['POST'])
-def webhooks_view(request):
-    """
-        @params: None
-        @return: HttpResponse
-        @desc: Listen to Stripe events in order to take further actions
-
-    """
-    payload = request.body
-    event = None
-
-    try:
-        event = stripe.Event.construct_from(
-            json.loads(payload), stripe.api_key
-        )
-    except ValueError as e:
-        return HttpResponse(status=400)
-
-    #Handle Event
-    if event.type == 'invoice.payment_succeeded':
-        print("Invoice payment succceeded")
-    elif event.type == 'invoice.payment_failed':
-        customer_id = event.data['object']['customer']
-        client = Client.objects.get(customer_id=customer_id)
-        client.statut = 'N'
-        client.save()
-    elif event.type == 'charge.succeeded':
-        print('Charge succeed')
-    elif event.type == 'charge.failed':
-        print('Charge failed')
-    elif event.type == 'payment_intent.succeeded':
-        customer_id = event.data['object']['customer']
-        client = Client.objects.get(customer_id=customer_id)
-        client.statut = 'R'
-        new_date = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600))
-        client.date_reglement = datetime.fromtimestamp(new_date)
-        client.save()
-    elif event.type == 'payment_intent.created':
-        print('Payment intent created')
-    elif event.type == 'payment_intent.payment_failed':
-        customer_id = event.data['object']['customer']
-        client = Client.objects.get(customer_id=customer_id)
-        client.statut = 'N'
-        client.save()
-    else:
-        return HttpResponse(status=400)
-    return HttpResponse(status=200)
+    montant = client.client.montant * 100
+    stripe.Plan.modify(
+        client.plan_id,
+        amount=montant
+    )  

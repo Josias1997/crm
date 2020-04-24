@@ -1,4 +1,4 @@
-import React, {useState, useEffect} from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {useStripe, useElements, IbanElement} from '@stripe/react-stripe-js';
 import axios from './../../util/instanceAxios';
 import './IbanFormStyle.css';
@@ -40,10 +40,13 @@ export default function PaymentSetupForm(props) {
   const elements = useElements();
   const [autorisationPrelevement, setAutorisationPrelevement] = useState(null);
   const [error, setError] = useState(null);
+  const [fileError, setFileError] = useState(null);
+  const [ibanError, setIbanError] = useState(null);
   const [message, setMessage] = useState(null);
   const [client, setClient] = useState({});
   const {id, token} = props;
 
+  const el = useRef(null);
 
   useEffect(() => {
     axios.get(`/api/client/get/${id}`)
@@ -56,15 +59,21 @@ export default function PaymentSetupForm(props) {
 
   const handleSubmit = async (event) => {
     setError(null);
+    setFileError(null);
+    setIbanError(null);
     setMessage(null);
     // We don't want to let default form submission happen here,
     // which would refresh the page.
     event.preventDefault();
 
-    if (!stripe || !elements || client.iban) {
-      console.log("Stripe not loaded yet");
+    if (!stripe || !elements) {
       // Stripe.js has not yet loaded.
       // Make sure to disable form submission until Stripe.js has loaded.
+      return;
+    }
+    if (!(autorisationPrelevement !== null)) {
+      setFileError('Champ Obligatoire');
+      el.current.style.border = '1px solid red';
       return;
     }
 
@@ -91,17 +100,18 @@ export default function PaymentSetupForm(props) {
         console.log(data);
         setMessage(data.message);
       }).catch(error => {
-        setError(error);
+        setError(error.message);
       })
     }).catch(error => {
-      setError(error);
+      setError(error.message);
     })
   };
 
   const handleChange = event => {
     setAutorisationPrelevement(event.target.files[0]);
+    setFileError(null);
   }
-
+  console.log(fileError);
   return (
       <form onSubmit={handleSubmit}>
         <div className="form-row">
@@ -110,18 +120,19 @@ export default function PaymentSetupForm(props) {
           </label>
           <IbanElement options={IBAN_ELEMENT_OPTIONS} onChange={event => {
             if (event.error) {
-              setError(event.error);
+              setIbanError(event.error.message);
             } else {
-              setError(null);
+              setIbanError(null);
             }
           }} />
         </div>
         {
-          error !== null ? <div className="alert alert-danger mt-2">{error.message}</div> : null
+          ibanError !== null ? <div className="alert alert-danger mt-2">{ibanError}</div> : null
         }
         <div className="form-row mt-3">
             <label>Uploader Autorisation de prélèvement</label>
-            <input 
+            <input
+              ref={el}
               className="form-control" 
               type="file" 
               name="autorisation_prelevement" 
@@ -129,12 +140,18 @@ export default function PaymentSetupForm(props) {
               accept=".pdf,.docx,.doc,.txt"
               onChange={handleChange}/>
         </div>
+        {
+          fileError !== null ? <div className="alert alert-danger mt-2">{fileError}</div> : null
+        }
         <div className="form-row mt-3">
           <a href="http://localhost:8000/media/files/autorisation_prelevement.pdf">Autorisation Prélèvement.pdf</a>
         </div>
         <button className="mt-3 btn btn-primary" type="submit" disabled={!stripe}>
           Valider Les informations
         </button>
+        {
+          error !== null ? <div className="alert alert-danger mt-2">{error}</div> : null
+        }
         {
           message !== null ? <div className="alert alert-success mt-2">{message}</div> : null
         }

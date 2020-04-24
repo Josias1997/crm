@@ -3,10 +3,12 @@ import { Route, Switch } from "react-router-dom";
 import asyncComponent from "../../util/asyncComponent";
 import { withRouter } from "react-router";
 import ClientPage from "./clients";
+import ProductPage from './products'
 
 const Routes = ({ match }) =>
   <Switch>
        <Route path={`${match.url}/clients`} component={ClientPage} />
+       <Route path={`${match.url}/products`} component={ProductPage} />
        <Route component={asyncComponent(() => import("app/routes/extraPages/routes/404"))}/>
   </Switch>;
 

@@ -13,6 +13,12 @@ const SideBarContent = () => {
           icon: 'view-dashboard',
           type: 'item',
           link: '/app/clients'
+        },
+        {
+          name: 'Produits',
+          icon: 'view-dashboard',
+          type: 'item',
+          link: '/app/products',
         }
       ]
     }

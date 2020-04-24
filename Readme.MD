@@ -1,19 +1,22 @@
 Projet CRM: (Jumbo React + Django)
 
 - Documentation
- * Créer un compte Stripe https://stripe.com
- * Créer un nouveau produit dans la partie produit du Dashboard
- * Récupérer l'id et le placer dans la variable PRODUCT_ID de settings.py
- * Nouveau terminal
-	$ cd server
-	$ pip install -r requirements.txt
-	$ python manage.py makemigrations
-	$ python manage.py migrate
+Running
 
- * Nouveau terminal
-	$ cd client
-	$ npm start
- * Aller à l'addresse localhost:3000
+    docker-compose build
+    docker-compose up
+    There should now be two servers running:
+
+    http://127.0.0.1:8000 is the Django app
+    http://127.0.0.1:3000 is the React app
+
+Using docker-compose run to issue one-off commands
+
+If you want to run a one-off command, like installing dependencies, you can use the docker-compose run <service_name> <cmd>.
+
+For example, to install a Javascript dependency and save that information to package.json we could run: docker-compose run --rm frontend npm install --save axios
+
+If you want to be on a shell for one of the Docker services, you can do something like: docker-compose run --rm frontend sh
 
  - NB: Changer les clés API de Stripe par les vôtres
  SECRET_KEY : server/server/settings.py
