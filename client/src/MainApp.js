@@ -14,7 +14,7 @@ const MainApp = () =>
   <Provider store={store}>
     <ConnectedRouter history={history}>
       <Switch>
-        <Route path="/iban/:societe/:id/:token" component={Payment} />
+        <Route path="/activate-account/:societe/:id/:token" component={Payment} />
         <Route path="/" component={App}/>
       </Switch>
     </ConnectedRouter>

@@ -2,8 +2,7 @@ version: '2'
 
 services:
   db:
-    image: wangxian/alpine-mysql
-    restart: always
+    image: mysql:5.7
     environment:
       MYSQL_PORT: 3306
       MYSQL_DATABASE: CRM
@@ -18,7 +17,7 @@ services:
     expose:
       - "3306"
     volumes:
-      - my-db:/var/lib/mysql
+      - myvolume:/var/lib/mysql
   django:
     build: ./server
     command: ["python", "manage.py", "runserver", "0.0.0.0:8000"]
@@ -30,6 +29,8 @@ services:
       - db
   frontend:
     build: ./client
+    stdin_open: true
+    tty: true
     command: ["npm", "start"]
     volumes:
       - ./client:/crm/client
@@ -38,5 +39,5 @@ services:
       - "3000:3000"
 
 volumes:
-  my-db:
+  myvolume:
   node-modules:

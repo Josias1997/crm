@@ -17,31 +17,18 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import { KeyboardDatePicker } from "@material-ui/pickers";
 import axios from "./../../../../../util/instanceAxios";
 
-class Add extends React.Component {
+class Form extends React.Component {
   constructor() {
     super();
-    this.state = {
-      societe: "",
-      email: "",
-      date_reglement: new Date(),
-      periodicite: "",
-      montant: 0,
-      mode_de_reglement: "",
-      statut: "",
-      statut_client: "",
-      iban: "",
-      loading: false,
-      error: null,
-    };
   }
 
-  handleChange = (event, name) => {
+  props.onHandleChange = (event, name) => {
     this.setState({
       [name]: event.target.value,
     });
   };
 
-  handleSubmit = () => {
+  props.onHandleSubmit = () => {
     console.log(this.state);
     // Axios request
     this.setState({
@@ -62,7 +49,7 @@ class Add extends React.Component {
         });
       });
   };
-  handleDateChange = (date) => {
+  props.onHandleDateChange = (date) => {
     let month = "" + (date._d.getMonth() + 1);
     let day = "" + date._d.getDate();
     let year = "" + date._d.getFullYear();
@@ -74,43 +61,28 @@ class Add extends React.Component {
   };
 
   render() {
+    const data = this.props;
     return (
-      <div className="app-wrapper">
-        <ContainerHeader
-          match={this.props.match}
-          title={<IntlMessages id="pages.clients" />}
-        />
-        {this.state.loading ? (
-          <div className="d-flex justify-content-center">
-            {" "}
-            <CircularProgress size={50} />{" "}
-          </div>
-        ) : (
           <CardBox styleName="col-lg-12">
-            <div className="alert alert-danger">
-              {this.state.error !== null ? this.state.error : null}
-            </div>
             <div className="col-md-12 col-12">
               <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Societe"
-                  value={this.state.societe}
                   className="w-100 mb-3"
                   inputProps={{
                     "aria-label": "Description",
                   }}
-                  onChange={(event) => this.handleChange(event, "societe")}
+                  onChange={(event) => this.props.onHandleChange(event, "societe")}
                 />
               </div>
               <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Email"
-                  value={this.state.email}
                   className="w-100 mb-3"
                   inputProps={{
                     "aria-label": "Description",
                   }}
-                  onChange={(event) => this.handleChange(event, "email")}
+                  onChange={(event) => this.props.onHandleChange(event, "email")}
                 />
               </div>
 
@@ -118,9 +90,9 @@ class Add extends React.Component {
                 <FormControl className="w-100 mb-2">
                   <InputLabel htmlFor="age-simple">Périodicité</InputLabel>
                   <Select
-                    value={this.state.periodicite}
+                    value={data.periodicite}
                     onChange={(event) =>
-                      this.handleChange(event, "periodicite")
+                      this.props.onHandleChange(event, "periodicite")
                     }
                     input={<Input id="ageSimple1" />}
                   >
@@ -138,9 +110,9 @@ class Add extends React.Component {
                     Mode de règlement
                   </InputLabel>
                   <Select
-                    value={this.state.mode_de_reglement}
+                    value={data.mode_de_reglement}
                     onChange={(event) =>
-                      this.handleChange(event, "mode_de_reglement")
+                      this.props.onHandleChange(event, "mode_de_reglement")
                     }
                     input={<Input id="ageSimple1" />}
                   >
@@ -151,8 +123,8 @@ class Add extends React.Component {
               <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Montant"
-                  value={this.state.montant}
-                  onChange={(event) => this.handleChange(event, "montant")}
+                  value={data.montant}
+                  onChange={(event) => this.props.onHandleChange(event, "montant")}
                   className="w-100 mb-3"
                   inputProps={{
                     "aria-label": "Description",
@@ -166,8 +138,8 @@ class Add extends React.Component {
                   <RadioGroup
                     aria-label="paiement"
                     name="paiement"
-                    value={this.state.statut}
-                    onChange={(event) => this.handleChange(event, "statut")}
+                    value={data.statut}
+                    onChange={(event) => this.props.onHandleChange(event, "statut")}
                   >
                     <FormControlLabel
                       value="R"
@@ -189,9 +161,9 @@ class Add extends React.Component {
                   <RadioGroup
                     aria-label="statut-client"
                     name="statut_client"
-                    value={this.state.statut_client}
+                    value={data.statut_client}
                     onChange={(event) =>
-                      this.handleChange(event, "statut_client")
+                      this.props.onHandleChange(event, "statut_client")
                     }
                   >
                     <FormControlLabel
@@ -213,8 +185,8 @@ class Add extends React.Component {
                   margin="normal"
                   id="date-picker-dialog"
                   label="Date règlement"
-                  value={this.state.date_reglement}
-                  onChange={this.handleDateChange}
+                  value={data.date_reglement}
+                  onChange={this.props.onHandleDateChange}
                   KeyboardButtonProps={{
                     "aria-label": "change date",
                   }}
@@ -228,22 +200,20 @@ class Add extends React.Component {
                   inputProps={{
                     "aria-label": "Iban",
                   }}
-                  onChange={(event) => this.handleChange(event, "iban")}
+                  onChange={(event) => this.props.onHandleChange(event, "iban")}
                 />
               </div>
               <Button
                 variant="contained"
-                onClick={this.handleSubmit}
+                onClick={this.props.onHandleSubmit}
                 color="primary"
               >
                 Valider
               </Button>
             </div>
           </CardBox>
-        )}
-      </div>
-    );
+         )
   }
 }
 
-export default Add;
+export default Form;

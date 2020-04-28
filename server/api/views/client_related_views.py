@@ -23,6 +23,21 @@ DAYS = {
     'A': 365
 }
 
+INTERVALS = {
+    'H': 'week',
+    'M': 'month',
+    'T': 'month',
+    'S': 'month',
+    'A': 'year'
+}
+
+INTERVALS_COUNT = {
+    'H': 1,
+    'M': 1,
+    'T': 3,
+    'S': 6,
+    'A': 1
+}
 # Create your views here.
 @api_view(['POST'])
 def add_client(request):
@@ -168,43 +183,13 @@ def update_iban(request):
         client.iban = f'{payment_method.sepa_debit.country}{payment_method.sepa_debit.bank_code}*******{payment_method.sepa_debit.last4}'
         plan = None
         montant = int(client.montant) * 100
-        if client.periodicite == 'H':
-            plan = stripe.Plan.create(
-                amount=montant,
-                currency='eur',
-                interval='week',
-                product=product.id
-            )
-        elif client.periodicite == 'M':
-            plan = stripe.Plan.create(
-                amount=montant,
-                currency='eur',
-                interval='month',
-                product=product.id
-            )
-        elif client.periodicite == 'T':
-            plan = stripe.Plan.create(
-                amount=montant,
-                currency='eur',
-                interval='month',
-                interval_count=3,
-                product=product.id
-            )
-        elif client.periodicite == 'S':
-            plan = stripe.Plan.create(
-                amount=montant,
-                currency='eur',
-                interval='month',
-                interval_count=6,
-                product=product.id
-            )
-        elif client.periodicite == 'A':
-            plan = stripe.Plan.create(
-                amount=montant,
-                currency='eur',
-                interval='year',
-                product=product.id
-            )
+        plan = stripe.Plan.create(
+            amount=montant,
+            currency='eur',
+            interval=INTERVALS[client.periodicite],
+            interval_count=INTERVALS_COUNT[client.periodicite],
+            product=product.id
+        )
         customer = stripe.Customer.create(
             email=client.email,
             payment_method=payment_method.id,
