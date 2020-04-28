@@ -150,7 +150,7 @@ export default function PaymentSetupForm(props) {
           Valider Les informations
         </button>
         {
-          error !== null ? <div className="alert alert-danger mt-2">{error}</div> : null
+          error !== null ? <div className="alert alert-danger mt-2">{error.message}</div> : null
         }
         {
           message !== null ? <div className="alert alert-success mt-2">{message}</div> : null

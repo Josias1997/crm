@@ -27,8 +27,8 @@ class Add extends React.Component {
       periodicite: "",
       montant: 0,
       mode_de_reglement: "",
-      statut: "",
-      statut_client: "",
+      statut: "N",
+      statut_client: "D",
       iban: "",
       loading: false,
       error: null,
@@ -171,12 +171,12 @@ class Add extends React.Component {
                   >
                     <FormControlLabel
                       value="R"
-                      control={<Radio color="primary" />}
+                      control={<Radio color="primary" checked={this.state.statut === "R" ? true : false} />}
                       label="Règlement à jour"
                     />
                     <FormControlLabel
                       value="N"
-                      control={<Radio color="primary" checked />}
+                      control={<Radio color="primary" checked={this.state.statut === "N" ? true : false} />}
                       label="Non à jour"
                     />
                     {/*<FormControlLabel value="disabled" disabled control={<Radio />} label="Disabled" />*/}
@@ -196,12 +196,12 @@ class Add extends React.Component {
                   >
                     <FormControlLabel
                       value="A"
-                      control={<Radio color="primary" />}
+                      control={<Radio color="primary" checked={this.state.statut_client === "A" ? true : false} />}
                       label="Actif"
                     />
                     <FormControlLabel
                       value="D"
-                      control={<Radio color="primary" checked/>}
+                      control={<Radio color="primary" checked={this.state.statut_client === "D" ? true : false}/>}
                       label="Non Actif"
                     />
                     {/*<FormControlLabel value="disabled" disabled control={<Radio />} label="Disabled" />*/}
