@@ -52,17 +52,30 @@ def add_product(request):
 @api_view(['PUT'])
 def update_product(request, pk):
     name = request.data['name']
+    price = int(request.data['price']) * 100
+    recurrence = request.data['recurrence']
     description = request.data['description']
     product = stripe.Product.modify(
     	pk,
     	name=name,
     	description=description
     )
+    plan = stripe.Plan.create(
+        amount=price,
+        currency='eur',
+        interval=INTERVALS[recurrence],
+        interval_count=INTERVALS_COUNT[recurrence],
+        product=product.id
+    )
     return Response(product)
 
 
 @api_view(['DELETE'])
 def delete_product(request, pk):
+    plans = stripe.Plan.list()
+    for plan in plans.data:
+        if plan.product == 'pk':
+            stripe.Plan.delete(plan.id)
     product = stripe.Product.delete(pk)
     return Response(product)
 
