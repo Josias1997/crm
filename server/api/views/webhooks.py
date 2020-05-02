@@ -1,9 +1,11 @@
 import json
 from django.views.decorators.csrf import csrf_exempt
 from rest_framework.decorators import api_view
-from api.models import Client
+from api.models import Client, Notification
 from django.http import HttpResponse
 import stripe
+from django.conf import settings
+from django.core.mail import send_mail
 
 @csrf_exempt
 @api_view(['POST'])
@@ -27,29 +29,49 @@ def webhooks_view(request):
     #Handle Event
     if event.type == 'invoice.payment_succeeded':
         print("Invoice payment succceeded")
+        invoice = event.data.object
+        client = Client.get(customer_id=invoice.customer)
+        client.statut = 'R'
+        client.save()
+        content = f'{datatime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Paiement OK'
+        notification = Notification(content=content)
+        notification.save()
+        send_mail('Staut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
     elif event.type == 'invoice.payment_failed':
-        customer_id = event.data['object']['customer']
+        invoice = event.data['object']
+        customer_id = invoice['customer']
         client = Client.objects.get(customer_id=customer_id)
         client.statut = 'N'
         client.save()
+        content = f'{datatime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Echec Paiement'
+        notification = Notification(content=content)
+        notification.save()
     elif event.type == 'charge.succeeded':
         print('Charge succeed')
     elif event.type == 'charge.failed':
         print('Charge failed')
     elif event.type == 'payment_intent.succeeded':
-        customer_id = event.data['object']['customer']
+        payment_intent = event.data['object']
+        customer_id = payment_intent['customer']
         client = Client.objects.get(customer_id=customer_id)
         client.statut = 'R'
         new_date = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600))
         client.date_reglement = datetime.fromtimestamp(new_date)
         client.save()
+        content = f'{datatime.fromtimestamp(payment_intent.created)} - {client.societe} - Retour API concernant la transaction {payment_intent.number} Echec'
+        notification = Notification(content=content)
+        notification.save()
     elif event.type == 'payment_intent.created':
         print('Payment intent created')
     elif event.type == 'payment_intent.payment_failed':
-        customer_id = event.data['object']['customer']
+        payment_intent = event.data['object']
+        customer_id = payment_intent['customer']
         client = Client.objects.get(customer_id=customer_id)
         client.statut = 'N'
         client.save()
+        content = f'{datatime.fromtimestamp(payment_intent.created)} - {client.societe} - Retour API concernant la transaction {payment_intent.number} Echec'
+        notification = Notification(content=content)
+        notification.save()
     else:
         return HttpResponse(status=400)
     return HttpResponse(status=200)

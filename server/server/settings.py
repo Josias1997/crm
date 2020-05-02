@@ -38,7 +38,7 @@ EMAIL_HOST_USER = 'kologojosias@gmail.com'
 EMAIL_HOST_PASSWORD = 'kingjosias'
 EMAIL_PORT = 587
 
-CLIENT_URL = 'http://213.32.78.171:3000'
+CLIENT_URL = 'http://localhost:3000'
 
 
 # Application definition

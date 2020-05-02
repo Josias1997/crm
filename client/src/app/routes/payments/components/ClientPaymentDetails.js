@@ -63,7 +63,7 @@ class ControlledExpansionPanels extends Component {
     const { classes, name } = this.props;
     const { expanded, payments, loading, error } = this.state;
 
-    const columns = ["Montant", "Date", "Statut"];
+    const columns = ["Montant", "Date", "Statut", "Facture"];
 
     return (
       <div className={classes.root}>

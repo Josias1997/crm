@@ -18,5 +18,6 @@ urlpatterns = [
     path('product/get/<str:pk>/', views.get_product),
     path('product/post/', views.add_product),
     path('products/', views.get_products),
-    path('webhooks/', views.webhooks_view)
+    path('webhooks/', views.webhooks_view),
+    path('notifications/', views.get_notifications),
 ]

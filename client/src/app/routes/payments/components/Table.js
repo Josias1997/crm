@@ -6,6 +6,7 @@ import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import CheckCircleIcon from '@material-ui/icons/CheckCircle';
 import WarningIcon from '@material-ui/icons/Warning';
+import DescriptionIcon from '@material-ui/icons/Description';
 
 function BasicTable(props) {
  
@@ -28,6 +29,7 @@ function BasicTable(props) {
                 <TableCell>{item.amount_paid}€</TableCell>
                 <TableCell align="center">{new Date(item.created * 1000).toLocaleDateString('fr-FR', options)}</TableCell>
                 <TableCell align="center">{item.status === "paid" ? <CheckCircleIcon color="primary" /> : <WarningIcon color="secondary" />}</TableCell>
+                <TableCell align="center"><DescriptionIcon color="primary" /><a href={item.invoice_pdf}>Facture</a></TableCell>
               </TableRow>
             );
           })}
