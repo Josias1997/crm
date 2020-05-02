@@ -21,15 +21,17 @@ class Edit extends Component {
     };
   }
 
-  componentDidUpdate() {
+  componentDidMount() {
+    console.log('Mount');
     this.setState({
       loading: true
     });
     axios
       .get(`/api/product/get/${this.props.match.params.id}`)
       .then(({ data }) => {
+        console.log(data);
         this.setState({
-         product: data.product,
+         product: data,
          loading: false
         });
       })
@@ -73,20 +75,15 @@ class Edit extends Component {
       });
   };
 
+
   render() {
     const { product, loading, error } = this.state;
-    console.log(product);
     return (
       <div className="app-wrapper">
-        <ContainerHeader
-          match={this.props.match}
-          title={"Products"}
-        />
-        {loading ? (
-          <div className="d-flex justify-content-center">
-            <CircularProgress size={50} />
-          </div>
-        ) : (
+        {
+          loading ?  <div className="d-flex justify-content-center"> 
+            <CircularProgress size={50} /> 
+          </div> :      
           <CardBox styleName="col-lg-12">
             <div className="alert alert-danger">
               {error !== null ? error : null}
@@ -95,7 +92,7 @@ class Edit extends Component {
               <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Nom"
-                  value={product.details.name}
+                  value={product.name}
                   className="w-100 mb-3"
                   inputProps={{
                     "aria-label": "Name",
@@ -106,7 +103,7 @@ class Edit extends Component {
               <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Prix"
-                  value={product.plan.price}
+                  value={product.price}
                   onChange={(event) => this.handleChange(event, "price")}
                   className="w-100 mb-3"
                   inputProps={{
@@ -121,7 +118,7 @@ class Edit extends Component {
                   <Select
                     disabled
                     value={
-                      product.details.type !== undefined
+                      product.type !== undefined
                         ? product.type
                         : "good"
                     }
@@ -139,7 +136,7 @@ class Edit extends Component {
                 <FormControl className="w-100 mb-2">
                   <InputLabel htmlFor="age-simple">Récurrence</InputLabel>
                   <Select
-                    value={product.plan.amount / 100}
+                    value={product.recurrence}
                     onChange={(event) =>
                       this.handleChange(event, "recurrence")
                     }
@@ -156,7 +153,7 @@ class Edit extends Component {
               <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Description"
-                  value={product.details.description}
+                  value={product.description}
                   className="w-100 mb-3"
                   inputProps={{
                     "aria-label": "Description",
@@ -173,10 +170,11 @@ class Edit extends Component {
               </Button>
             </div>
           </CardBox>
-        )}
+        }
       </div>
     );
   }
+  
 }
 
 export default Edit;

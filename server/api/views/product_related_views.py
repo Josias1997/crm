@@ -88,11 +88,24 @@ def get_product(request, pk):
     for plan in plans.data:
         if plan.product == pk:
             product_plan = plan
+    recurrence = None
+    if product_plan.interval == 'week':
+        recurrence = 'H'
+    elif product_plan.interval == 'month' and product_plan.interval_count == 1:
+        recurrence = 'M'
+    elif product_plan.interval == 'month' and product_plan.interval_count == 3:
+        recurrence = 'T'
+    elif product_plan.interval == 'month' and product_plan.interval_count == 6:
+        recurrence = 'S'
+    elif product_plan.interval == 'year' and product_plan.interval_count == 1:
+        recurrence = 'A'
     return Response({
-        'product': {
-            'details': product,
-            'plan': product_plan
-        }
+        'id': product.id,
+        'type': product.type,
+        'name': product.name,
+        'description': product.description,
+        'price': product_plan.amount / 100,
+        'recurrence': recurrence
     })
 
 

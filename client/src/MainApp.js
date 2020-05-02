@@ -16,7 +16,7 @@ const MainApp = () =>
     <ConnectedRouter history={history}>
       <Switch>
         <Route path="/activate-account/:societe/:id/:token" component={() => <Login title="Activate account"/>} />
-        <Route path="/account/login" component={() => <Login title="Login"/>} />
+        <Route path="/account/login/:id" component={() => <Login title="Login"/>} />
         <Route path="/account/profile/:id" component={ClientProfile} />
         <Route path="/" component={App}/>
       </Switch>

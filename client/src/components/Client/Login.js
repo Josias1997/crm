@@ -15,26 +15,26 @@ import { withRouter } from 'react-router-dom';
 const Login = (props) => {
 	const [email, setEmail] = useState("");
 	const [password, setPassword] = useState("");
+	const [token, setToken] = useState('');
 	const [loader, setLoader] = useState(false);
 	const [error, setError] = useState(null);
-	const {id, token} = props.match.params;
+	const {id} = props.match.params;
 
 	useEffect(() => {
 		if(localStorage.getItem('token')) {
 			props.history.push(`/account/profile/${id}`);
 		}
-		if(props.title === "Activate account") {
-			setLoader(true);
-			axios.get(`/api/client/get/${id}`)
-			.then(({data}) => {
-				setEmail(data.client.email);
-				setPassword(data.client.societe);
-				setLoader(false);
-			}).catch(error => {
-				setError(error);
-				setLoader(false);
-			})
-		}
+		setLoader(true);
+		axios.get(`/api/client/get/${id}`)
+		.then(({data}) => {
+			setEmail(data.client.email);
+			setPassword(data.client.societe);
+			setToken(data.client.token);
+			setLoader(false);
+		}).catch(error => {
+			setError(error);
+			setLoader(false);
+		})
 	}, [])
 
 	const login = (email, password) => {

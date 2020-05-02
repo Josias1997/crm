@@ -1,6 +1,7 @@
 import React from 'react';
 import {Redirect, Route, Switch} from 'react-router-dom';
 import asyncComponent from '../../../util/asyncComponent';
+import EditProduct from './routes/EditProduct';
 
 const ProductPage = ({match}) => (
   <div className="app-wrapper">

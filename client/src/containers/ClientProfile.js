@@ -16,7 +16,7 @@ const ClientProfile = (props) => {
 
   useEffect(() => {
     if(!localStorage.getItem('user')) {
-      props.history.push('/account/login');
+      props.history.push(`/account/login/${id}`);
     }
     axios.get(`/api/client/get/${id}`)
     .then(({data}) => {
