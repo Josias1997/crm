@@ -1,7 +1,5 @@
-import React from "react";
-import ContainerHeader from "components/ContainerHeader/index";
-import IntlMessages from "util/IntlMessages";
-import Input from "@material-ui/core/Input";
+import React, {Component} from "react";
+import ContainerHeader from "components/ContainerHeader/index";import Input from "@material-ui/core/Input";
 import CardBox from "components/CardBox/index";
 import MenuItem from "@material-ui/core/MenuItem";
 import FormControl from "@material-ui/core/FormControl";
@@ -9,10 +7,11 @@ import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
+import InputAdornment from "@material-ui/core/InputAdornment";
 import axios from "./../../../../../util/instanceAxios";
 
 
-class Edit extends React.Component {
+class Edit extends Component {
   constructor() {
     super();
     this.state = {
@@ -22,15 +21,15 @@ class Edit extends React.Component {
     };
   }
 
-  componentDidMount() {
+  componentDidUpdate() {
     this.setState({
       loading: true
-    })
+    });
     axios
       .get(`/api/product/get/${this.props.match.params.id}`)
       .then(({ data }) => {
         this.setState({
-         product: data,
+         product: data.product,
          loading: false
         });
       })
@@ -75,7 +74,8 @@ class Edit extends React.Component {
   };
 
   render() {
-    const { product, loading } = this.state;
+    const { product, loading, error } = this.state;
+    console.log(product);
     return (
       <div className="app-wrapper">
         <ContainerHeader
@@ -84,19 +84,18 @@ class Edit extends React.Component {
         />
         {loading ? (
           <div className="d-flex justify-content-center">
-            {" "}
-            <CircularProgress size={50} />{" "}
+            <CircularProgress size={50} />
           </div>
         ) : (
           <CardBox styleName="col-lg-12">
             <div className="alert alert-danger">
-              {this.state.error !== null ? this.state.error : null}
+              {error !== null ? error : null}
             </div>
             <div className="col-md-12 col-12">
               <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Nom"
-                  value={product.name}
+                  value={product.details.name}
                   className="w-100 mb-3"
                   inputProps={{
                     "aria-label": "Name",
@@ -105,12 +104,24 @@ class Edit extends React.Component {
                 />
               </div>
               <div className="col-lg-12 col-sm-12 col-12">
+                <Input
+                  placeholder="Prix"
+                  value={product.plan.price}
+                  onChange={(event) => this.handleChange(event, "price")}
+                  className="w-100 mb-3"
+                  inputProps={{
+                    "aria-label": "Price",
+                  }}
+                  startAdornment={<InputAdornment position="start">€</InputAdornment>}
+                />
+              </div>
+              <div className="col-lg-12 col-sm-12 col-12">
                 <FormControl className="w-100 mb-2">
                   <InputLabel htmlFor="type">Type</InputLabel>
                   <Select
                     disabled
                     value={
-                      product.type !== undefined
+                      product.details.type !== undefined
                         ? product.type
                         : "good"
                     }
@@ -125,9 +136,27 @@ class Edit extends React.Component {
                 </FormControl>
               </div>
               <div className="col-lg-12 col-sm-12 col-12">
+                <FormControl className="w-100 mb-2">
+                  <InputLabel htmlFor="age-simple">Récurrence</InputLabel>
+                  <Select
+                    value={product.plan.amount / 100}
+                    onChange={(event) =>
+                      this.handleChange(event, "recurrence")
+                    }
+                    input={<Input id="recurrence" />}
+                  >
+                    <MenuItem value={"H"}>Hebdomadaire</MenuItem>
+                    <MenuItem value={"M"}>Mensuel</MenuItem>
+                    <MenuItem value={"T"}>Trimestriel</MenuItem>
+                    <MenuItem value={"S"}>Semestriel</MenuItem>
+                    <MenuItem value={"A"}>Annuel</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+              <div className="col-lg-12 col-sm-12 col-12">
                 <Input
                   placeholder="Description"
-                  value={product.description}
+                  value={product.details.description}
                   className="w-100 mb-3"
                   inputProps={{
                     "aria-label": "Description",

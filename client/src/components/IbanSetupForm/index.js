@@ -2,6 +2,7 @@ import React, {useState, useEffect, useRef} from 'react';
 import {useStripe, useElements, IbanElement} from '@stripe/react-stripe-js';
 import axios from './../../util/instanceAxios';
 import './IbanFormStyle.css';
+import CircularProgress from '@material-ui/core/CircularProgress';
 
 
 // Custom styling can be passed as options when creating an Element.
@@ -43,8 +44,9 @@ export default function PaymentSetupForm(props) {
   const [fileError, setFileError] = useState(null);
   const [ibanError, setIbanError] = useState(null);
   const [message, setMessage] = useState(null);
+  const [loading, setLoading] = useState(false);
   const [client, setClient] = useState({});
-  const {id, token} = props;
+  const {id} = props;
 
   const el = useRef(null);
 
@@ -58,6 +60,7 @@ export default function PaymentSetupForm(props) {
   }, []);
 
   const handleSubmit = async (event) => {
+    el.current.style.border = 'none';
     setError(null);
     setFileError(null);
     setIbanError(null);
@@ -78,6 +81,7 @@ export default function PaymentSetupForm(props) {
     }
 
     const iban = elements.getElement('iban');
+    setLoading(true);
     stripe.createPaymentMethod({
       type: 'sepa_debit',
       sepa_debit: iban,
@@ -89,29 +93,31 @@ export default function PaymentSetupForm(props) {
       console.log(paymentMethod);
       const formData = new FormData();
       formData.append('id', id);
-      formData.append('token', token);
       formData.append('payment_method', paymentMethod.id);
       formData.append('autorisation_prelevement', autorisationPrelevement);
-      axios.post('/api/client/update-iban/', formData, {
+      axios.post('/api/client/set-iban/', formData, {
         headers: {
           'content-type': 'multipart/form-data'
         }
       }).then(({data}) => {
         console.log(data);
         setMessage(data.message);
+        setLoading(false);
       }).catch(error => {
         setError(error.message);
+        setLoading(false);
       })
     }).catch(error => {
       setError(error.message);
+      setLoading(false);
     })
   };
 
   const handleChange = event => {
     setAutorisationPrelevement(event.target.files[0]);
+    el.current.style.border = 'none';
     setFileError(null);
   }
-  console.log(fileError);
   return (
       <form onSubmit={handleSubmit}>
         <div className="form-row">
@@ -146,11 +152,13 @@ export default function PaymentSetupForm(props) {
         <div className="form-row mt-3">
           <a href="http://localhost:8000/media/files/autorisation_prelevement.pdf">Autorisation Prélèvement.pdf</a>
         </div>
-        <button className="mt-3 btn btn-primary" type="submit" disabled={!stripe}>
+        {
+          loading ? <CircularProgress size={50} /> : <button className="mt-3 btn btn-primary" type="submit" disabled={!stripe}>
           Valider Les informations
         </button>
+        }
         {
-          error !== null ? <div className="alert alert-danger mt-2">{error.message}</div> : null
+          error !== null ? <div className="alert alert-danger mt-2">{error}</div> : null
         }
         {
           message !== null ? <div className="alert alert-success mt-2">{message}</div> : null

@@ -33,7 +33,7 @@ class List extends React.Component {
           history={this.props.history} 
           columnData={columnData} 
           name={"clients"} 
-          title={"Products"}/>
+          title={"Clients"}/>
       </div>
     );
   }

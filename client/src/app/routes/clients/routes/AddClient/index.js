@@ -23,22 +23,72 @@ class Add extends React.Component {
     this.state = {
       societe: "",
       email: "",
-      date_reglement: new Date(),
+      date_reglement: this.changeDateFormat(new Date()),
       periodicite: "",
       montant: 0,
       mode_de_reglement: "",
       statut: "N",
       statut_client: "D",
       iban: "",
+      product: "",
+      plan: "",
+      products: [],
       loading: false,
       error: null,
     };
   }
 
+  componentDidMount() {
+  	axios.get('/api/products/')
+  	.then(({data}) => {
+  		console.log(data);
+  		this.setState({
+  			products: data.products
+  		})
+  	}).catch(error => {
+  		this.setState({
+  			error: error
+  		})
+  	})
+  }
+
   handleChange = (event, name) => {
-    this.setState({
-      [name]: event.target.value,
-    });
+  	if (name === "product") {
+		this.setState({
+			product: event.target.value,
+		}, () => {
+			let product = this.state.products.filter(product => product.details.id === this.state.product)[0];
+			let montant = product.plan.amount / 100;
+			let periodicite = "H";
+			switch(product.plan.interval && product.plan.interval_count){
+				case "week" && 1:
+					periodicite = "H";
+					break;
+				case "month" && 1:
+					periodicite = "M";
+					break;
+				case "month" && 3:
+					periodicite = "T";
+					break;
+				case "month" && 6:
+					periodicite = "S";
+					break;
+				case "year" && 1:
+					periodicite = "A";
+					break;
+
+			}
+			this.setState({
+				montant: montant,
+				periodicite: periodicite,
+				plan: product.plan.id
+			});
+		});
+  	} else {
+		this.setState({
+      		[name]: event.target.value,
+    	});
+  	}
   };
 
   handleSubmit = () => {
@@ -63,14 +113,18 @@ class Add extends React.Component {
       });
   };
   handleDateChange = (date) => {
-    let month = "" + (date._d.getMonth() + 1);
-    let day = "" + date._d.getDate();
-    let year = "" + date._d.getFullYear();
+    this.setState({
+      date_reglement: this.changeDateFormat(date._d),
+    });
+  };
+
+  changeDateFormat = (date) => {
+    let month = "" + (date.getMonth() + 1);
+    let day = "" + date.getDate();
+    let year = "" + date.getFullYear();
     if (month.length < 2) month = "0" + month;
     if (day.length < 2) day = "0" + day;
-    this.setState({
-      date_reglement: [year, month, day].join("-"),
-    });
+    return [year, month, day].join("-");
   };
 
   render() {
@@ -129,6 +183,22 @@ class Add extends React.Component {
                     <MenuItem value={"T"}>Trimestriel</MenuItem>
                     <MenuItem value={"S"}>Semestriel</MenuItem>
                     <MenuItem value={"A"}>Annuel</MenuItem>
+                  </Select>
+                </FormControl>
+              </div>
+              <div className="col-lg-12 col-sm-12 col-12">
+                <FormControl className="w-100 mb-2">
+                  <InputLabel htmlFor="product">Produit</InputLabel>
+                  <Select
+                    value={this.state.product}
+                    onChange={(event) =>
+                      this.handleChange(event, "product")
+                    }
+                    input={<Input id="product" />}
+                  >
+                  {
+                  	this.state.products.map(product => <MenuItem value={product.details.id} key={product.details.id}>{product.details.name}</MenuItem>)
+                  }
                   </Select>
                 </FormControl>
               </div>

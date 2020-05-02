@@ -25,9 +25,6 @@ SECRET_KEY = 'nkkt6!_f^iz#ko^a14e%poj1s-&^l_*hazto6xj**jj^g*sf(%'
 # STRIPE API KEY
 SECRET_API_KEY = "sk_test_rRU8WPZxcJ6K2wDntvpDFezH00dst7iywd"
 
-# STRIPE PRODUCT ID
-PRODUCT_ID = "prod_H3gbHHp9Jvij0M"
-
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 

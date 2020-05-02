@@ -1,203 +1,86 @@
-import React, {useEffect} from "react";
-import { createMuiTheme } from "@material-ui/core/styles";
-import { ThemeProvider } from "@material-ui/styles";
-import URLSearchParams from "url-search-params";
-import MomentUtils from "@date-io/moment";
-import { MuiPickersUtilsProvider} from '@material-ui/pickers';
-import { Redirect, Route, Switch } from "react-router-dom";
-import {useDispatch, useSelector} from "react-redux";
-import { IntlProvider } from "react-intl";
-import "assets/vendors/style";
-import indigoTheme from "./themes/indigoTheme";
-import cyanTheme from "./themes/cyanTheme";
-import orangeTheme from "./themes/orangeTheme";
-import amberTheme from "./themes/amberTheme";
-import pinkTheme from "./themes/pinkTheme";
-import blueTheme from "./themes/blueTheme";
-import purpleTheme from "./themes/purpleTheme";
-import greenTheme from "./themes/greenTheme";
-import AppLocale from "../lngProvider";
+import React, {useState, useEffect} from "react";
+import { NavLink, Switch, Route, Redirect } from "react-router-dom";
+import "./ClientProfile.css";
+import Edit from './../components/Client/Edit';
+import axios from './../util/instanceAxios';
+import Payment from './Payment';
 
-import {
-  AMBER,
-  BLUE,
-  CYAN,
-  DARK_AMBER,
-  DARK_BLUE,
-  DARK_CYAN,
-  DARK_DEEP_ORANGE,
-  DARK_DEEP_PURPLE,
-  DARK_GREEN,
-  DARK_INDIGO,
-  DARK_PINK,
-  DEEP_ORANGE,
-  DEEP_PURPLE,
-  GREEN,
-  INDIGO,
-  PINK
-} from "constants/ThemeColors";
-import SignIn from "./SignIn";
-import SignUp from "./SignUp";
-import { setInitUrl } from "../actions/Auth";
-import RTL from "util/RTL";
-import asyncComponent from "util/asyncComponent";
-import { setDarkTheme, setThemeColor } from "../actions/Setting";
-import AppLayout from "./AppLayout";
 
-const RestrictedRoute = ({component: Component, authUser, ...rest}) =>
-  <Route
-    {...rest}
-    render={props =>
-      authUser
-        ? <Component {...props} />
-        : <Redirect
-          to={{
-            pathname: '/signin',
-            state: {from: props.location}
-          }}
-        />}
-  />;
+const ClientProfile = (props) => {
+  const [error, setError] = useState("");
+  const [societe, setSociete] = useState("");
+  const [dateProchainReglement, setDateProchainReglement] = useState('');
+  const { id, action } = props.match.params;
 
-const App = (props) => {
-  const dispatch = useDispatch();
-  const {themeColor, darkTheme, locale, isDirectionRTL} = useSelector(({settings}) => settings);
-  const {authUser, initURL} = useSelector(({auth}) => auth);
-  const isDarkTheme = darkTheme;
-  const {match, location} = props;
+  const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' };
 
   useEffect(() => {
-    window.__MUI_USE_NEXT_TYPOGRAPHY_VARIANTS__ = true;
-    if (initURL === '') {
-      dispatch(setInitUrl(props.history.location.pathname));
+    if(!localStorage.getItem('user')) {
+      props.history.push('/account/login');
     }
-    const params = new URLSearchParams(props.location.search);
-    if (params.has("theme-name")) {
-      dispatch(setThemeColor(params.get('theme-name')));
-    }
-    if (params.has("dark-theme")) {
-      dispatch(setDarkTheme());
-    }
-  }, [dispatch, initURL, props.history.location.pathname, props.location.search]);
+    axios.get(`/api/client/get/${id}`)
+    .then(({data}) => {
+      setSociete(data.client.societe);
+      setDateProchainReglement(new Date(data.client.date_reglement).toLocaleDateString('fr-FR', options));
+    }).catch(error => {
+      setError(error);
+    })
+  }, [])
 
-
-  const getColorTheme = (themeColor, applyTheme) => {
-    switch (themeColor) {
-      case INDIGO: {
-        applyTheme = createMuiTheme(indigoTheme);
-        break;
-      }
-      case CYAN: {
-        applyTheme = createMuiTheme(cyanTheme);
-        break;
-      }
-      case AMBER: {
-        applyTheme = createMuiTheme(amberTheme);
-        break;
-      }
-      case DEEP_ORANGE: {
-        applyTheme = createMuiTheme(orangeTheme);
-        break;
-      }
-      case PINK: {
-        applyTheme = createMuiTheme(pinkTheme);
-        break;
-      }
-      case BLUE: {
-        applyTheme = createMuiTheme(blueTheme);
-        break;
-      }
-      case DEEP_PURPLE: {
-        applyTheme = createMuiTheme(purpleTheme);
-        break;
-      }
-      case GREEN: {
-        applyTheme = createMuiTheme(greenTheme);
-        break;
-      }
-      case DARK_INDIGO: {
-        applyTheme = createMuiTheme({...indigoTheme, direction: 'rtl'});
-        break;
-      }
-      case DARK_CYAN: {
-        applyTheme = createMuiTheme(cyanTheme);
-        break;
-      }
-      case DARK_AMBER: {
-        applyTheme = createMuiTheme(amberTheme);
-        break;
-      }
-      case DARK_DEEP_ORANGE: {
-        applyTheme = createMuiTheme(orangeTheme);
-        break;
-      }
-      case DARK_PINK: {
-        applyTheme = createMuiTheme(pinkTheme);
-        break;
-      }
-      case DARK_BLUE: {
-        applyTheme = createMuiTheme(blueTheme);
-        break;
-      }
-      case DARK_DEEP_PURPLE: {
-        applyTheme = createMuiTheme(purpleTheme);
-        break;
-      }
-      case DARK_GREEN: {
-        applyTheme = createMuiTheme(greenTheme);
-        break;
-      }
-      default : createMuiTheme(indigoTheme);
-    }
-    return applyTheme;
-  };
-
-  let applyTheme = createMuiTheme(indigoTheme);
-  if (isDarkTheme) {
-    document.body.classList.add('dark-theme');
-    applyTheme = createMuiTheme(darkTheme)
-  } else {
-    applyTheme = getColorTheme(themeColor, applyTheme);
-  }
-  if (location.pathname === '/') {
-    if (authUser === null) {
-      return ( <Redirect to={'/signin'}/> );
-    } else if (initURL === '' || initURL === '/' || initURL === '/signin') {
-      return ( <Redirect to={'/app/clients'}/> );
-    } else {
-      return ( <Redirect to={initURL}/> );
-    }
-  }
-  if (isDirectionRTL) {
-    applyTheme.direction = 'rtl';
-    document.body.classList.add('rtl')
-  } else {
-    document.body.classList.remove('rtl');
-    applyTheme.direction = 'ltr';
-  }
-
-  const currentAppLocale = AppLocale[locale.locale];
   return (
-    <ThemeProvider theme={applyTheme}>
-      <MuiPickersUtilsProvider utils={MomentUtils}>
-        <IntlProvider
-          locale={currentAppLocale.locale}
-          messages={currentAppLocale.messages}>
-          <RTL>
-            <div className="app-main">
-              <Switch>
-                <RestrictedRoute path={`${match.url}app`} authUser={authUser}
-                                 component={AppLayout}/>
-                <Route path='/signin' component={SignIn}/>
-                <Route path='/signup' component={SignUp}/>
-                <Route
-                  component={asyncComponent(() => import('app/routes/extraPages/routes/404'))}/>
-              </Switch>
+    <div className="container mt-5">
+      <div className="row">
+        <div className="col-lg-4 pb-5">
+          <div className="author-card pb-3">
+            <div
+              className="author-card-cover"
+              style={{
+                backgroundImage:
+                  "url(https://demo.createx.studio/createx-html/img/widgets/author/cover.jpg)",
+              }}
+            >
             </div>
-          </RTL>
-        </IntlProvider>
-      </MuiPickersUtilsProvider>
-    </ThemeProvider>
+            <div className="author-card-profile">
+              <div className="author-card-avatar">
+                <img
+                  src="https://bootdey.com/img/Content/avatar/avatar1.png"
+                  alt="Daniel Adams"
+                />
+              </div>
+              <div className="author-card-details">
+                <h5 className="author-card-name text-lg">{societe}</h5>
+                <span className="author-card-position">
+                  Prochain Paiement: {dateProchainReglement}
+                </span>
+              </div>
+            </div>
+          </div>
+          <div className="wizard">
+            <nav className="list-group list-group-flush">
+              <NavLink className="list-group-item" activeClassName="active" to={`/account/profile/${id}/edit`}>
+                <i className="fe-icon-user text-muted"></i>Paramètres Profile
+              </NavLink>
+              <NavLink className="list-group-item" activeClassName="active" to={`/account/profile/${id}/set-up-payment`}>
+                <div className="d-flex justify-content-between align-items-center">
+                  <div>
+                    <i className="fe-icon-heart mr-1 text-muted"></i>
+                    <div className="d-inline-block font-weight-medium text-uppercase">
+                      Mode de paiement
+                    </div>
+                  </div>
+                </div>
+              </NavLink>
+            </nav>
+          </div>
+        </div>
+        <Switch>
+          <Redirect exact from={`${props.match.url}/`} to={`${props.match.url}/edit`}/>
+          <Route path={`${props.match.url}/edit`} component={() => <Edit id={id} />} />
+          <Route path={`${props.match.url}/set-up-payment`} component={() => <Payment id={id} />} />
+        </Switch>
+      </div>
+    </div>
   );
 };
 
-export default App;
+export default ClientProfile;

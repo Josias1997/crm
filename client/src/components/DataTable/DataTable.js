@@ -49,7 +49,7 @@ const DataTable = (props) => {
             if (props.name === 'clients') {
               setData(JSON.parse(data[props.name]));
             } else if(props.name === 'products') {
-              setData(data);
+              setData(data[props.name]);
             }
             setLoading(false);
           }).catch(error => {
@@ -217,25 +217,25 @@ const DataTable = (props) => {
                     </TableCell>
                   </TableRow> : <TableRow
                     hover
-                    onClick={event => handleClick(event, n.id)}
-                    onKeyDown={event => handleKeyDown(event, n.id)}
+                    onClick={event => handleClick(event, n.details.id)}
+                    onKeyDown={event => handleKeyDown(event, n.details.id)}
                     role="checkbox"
                     aria-checked={isSelect}
                     tabIndex={-1}
-                    key={n.id}
+                    key={n.details.id}
                     selected={isSelect}
                   >
                     <TableCell padding="checkbox">
                       <Checkbox color="primary" checked={isSelect}/>
                     </TableCell>
-                    <TableCell padding="none">{n.name}</TableCell>
-                    <TableCell align="left">{n.type}</TableCell>
-                    <TableCell align="left">{n.description}</TableCell>
+                    <TableCell padding="none">{n.details.name}</TableCell>
+                    <TableCell align="left">{n.details.type}</TableCell>
+                    <TableCell align="left">{n.details.description}</TableCell>
                     <TableCell align="left">
-                      <IconButton color="primary" onClick={() => props.history.push(`/app/products/edit/${n.id}`)}>
+                      <IconButton color="primary" onClick={() => props.history.push(`/app/products/edit/${n.details.id}`)}>
                         <EditIcon />
                       </IconButton>
-                      <IconButton color="secondary" onClick={() => handleDelete(n.id, 'product')}>
+                      <IconButton color="secondary" onClick={() => handleDelete(n.details.id, 'product')}>
                         <DeleteIcon />
                       </IconButton>
                     </TableCell>

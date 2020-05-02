@@ -19,6 +19,12 @@ const SideBarContent = () => {
           icon: 'view-dashboard',
           type: 'item',
           link: '/app/products',
+        },
+        {
+          name: 'Paiements/Prélèvements',
+          icon: 'view-dashboard',
+          type: 'item',
+          link: '/app/payments'
         }
       ]
     }

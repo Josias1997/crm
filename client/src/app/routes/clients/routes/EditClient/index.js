@@ -12,7 +12,7 @@ import FormLabel from "@material-ui/core/FormLabel";
 import Radio from "@material-ui/core/Radio";
 import RadioGroup from "@material-ui/core/RadioGroup";
 import Button from "@material-ui/core/Button";
-import InputAdornment from '@material-ui/core/InputAdornment';
+import InputAdornment from "@material-ui/core/InputAdornment";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import axios from "./../../../../../util/instanceAxios";
 import { KeyboardDatePicker } from "@material-ui/pickers";
@@ -23,6 +23,7 @@ class Edit extends React.Component {
     super();
     this.state = {
       client: {},
+      products: [],
       loading: false,
       error: null,
     };
@@ -41,14 +42,65 @@ class Edit extends React.Component {
       .catch((error) => {
         console.log(error);
       });
+    axios.get('/api/products/')
+    .then(({data}) => {
+      console.log(data);
+      this.setState({
+        products: data.products
+      })
+    }).catch(error => {
+      this.setState({
+        error: error
+      })
+    })
   }
 
   handleChange = (event, name) => {
     const { client } = this.state;
-    client[name] = event.target.value;
-    this.setState({
-      client: client,
-    });
+    if (name === "product") {
+      client.product_id = event.target.value;
+      this.setState(
+        {
+          client: client,
+        },
+        () => {
+          let product = this.state.products.filter(
+            (product) => product.details.id === client.product_id
+          )[0];
+          let montant = product.plan.amount / 100;
+          let periodicite = "H";
+          switch (product.plan.interval && product.plan.interval_count) {
+            case "week" && 1:
+              periodicite = "H";
+              break;
+            case "month" && 1:
+              periodicite = "M";
+              break;
+            case "month" && 3:
+              periodicite = "T";
+              break;
+            case "month" && 6:
+              periodicite = "S";
+              break;
+            case "year" && 1:
+              periodicite = "A";
+              break;
+          }
+          client.montant = montant;
+          client.periodicite = periodicite;
+          client.plan_id = product.plan.id;
+
+          this.setState({
+            client: client,
+          });
+        }
+      );
+    } else {
+      client[name] = event.target.value;
+      this.setState({
+        client: client,
+      });
+    }
   };
 
   handleSubmit = () => {
@@ -159,6 +211,22 @@ class Edit extends React.Component {
               </div>
               <div className="col-lg-12 col-sm-12 col-12">
                 <FormControl className="w-100 mb-2">
+                  <InputLabel htmlFor="product">Produit</InputLabel>
+                  <Select
+                    value={client.product_id !== undefined ? client.product_id : ""}
+                    onChange={(event) =>
+                      this.handleChange(event, "product")
+                    }
+                    input={<Input id="product" />}
+                  >
+                  {
+                    this.state.products.map(product => <MenuItem value={product.details.id} key={product.details.id}>{product.details.name}</MenuItem>)
+                  }
+                  </Select>
+                </FormControl>
+              </div>
+              <div className="col-lg-12 col-sm-12 col-12">
+                <FormControl className="w-100 mb-2">
                   <InputLabel htmlFor="age-simple">
                     Mode de règlement
                   </InputLabel>
@@ -218,7 +286,9 @@ class Edit extends React.Component {
                   inputProps={{
                     "aria-label": "Description",
                   }}
-                  startAdornment={<InputAdornment position="start">€</InputAdornment>}
+                  startAdornment={
+                    <InputAdornment position="start">€</InputAdornment>
+                  }
                 />
               </div>
               <div className="col-lg-12 col-sm-12 col-12">
@@ -275,9 +345,21 @@ class Edit extends React.Component {
                   disabled
                   className="w-100 mb-3"
                   inputProps={{
-                    "aria-label": "Description",
+                    "aria-label": "Iban",
                   }}
                   onChange={(event) => this.handleChange(event, "iban")}
+                />
+              </div>
+              <div className="col-lg-12 col-sm-12 col-12">
+                <Input
+                  placeholder="Card Info"
+                  value={client.card_info}
+                  disabled
+                  className="w-100 mb-3"
+                  inputProps={{
+                    "aria-label": "Card",
+                  }}
+                  onChange={(event) => this.handleChange(event, "card_info")}
                 />
               </div>
               <Badge color="dark">

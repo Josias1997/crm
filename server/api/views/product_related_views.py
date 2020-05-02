@@ -74,7 +74,7 @@ def update_product(request, pk):
 def delete_product(request, pk):
     plans = stripe.Plan.list()
     for plan in plans.data:
-        if plan.product == 'pk':
+        if plan.product == pk:
             stripe.Plan.delete(plan.id)
     product = stripe.Product.delete(pk)
     return Response(product)
@@ -83,10 +83,33 @@ def delete_product(request, pk):
 @api_view(['GET'])
 def get_product(request, pk):
     product = stripe.Product.retrieve(pk)
-    return Response(product)
+    plans = stripe.Plan.list()
+    product_plan = None
+    for plan in plans.data:
+        if plan.product == pk:
+            product_plan = plan
+    return Response({
+        'product': {
+            'details': product,
+            'plan': product_plan
+        }
+    })
 
 
 @api_view(['GET'])
 def get_products(request):
     products = stripe.Product.list()
-    return Response(products.data)
+    plans = stripe.Plan.list()
+    product_details = []
+    for product in products.data:
+        plan_details = {}
+        for plan in plans.data:
+            if plan.product == product.id:
+                plan_details = plan
+        product_details.append({
+            'details': product,
+            'plan': plan_details
+        })
+    return Response({
+        'products': product_details
+    })
