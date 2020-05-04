@@ -18,14 +18,22 @@ const ClientProfile = (props) => {
     if(!localStorage.getItem('user')) {
       props.history.push(`/account/login/${id}`);
     }
-    axios.get(`/api/client/get/${id}`)
-    .then(({data}) => {
-      setSociete(data.client.societe);
-      setDateProchainReglement(new Date(data.client.date_reglement).toLocaleDateString('fr-FR', options));
-    }).catch(error => {
-      setError(error);
-    })
+    else {
+      axios.get(`/api/client/get/${id}`)
+      .then(({data}) => {
+        setSociete(data.client.societe);
+        setDateProchainReglement(new Date(data.client.date_reglement).toLocaleDateString('fr-FR', options));
+      }).catch(error => {
+        setError(error);
+      })
+    }
   }, [])
+
+  const logout = () => {
+    localStorage.removeItem('user');
+    localStorage.removeItem('expirationDate');
+    props.history.push(`/account/login/${id}`);
+  }
 
   return (
     <div className="container mt-5">
@@ -70,6 +78,11 @@ const ClientProfile = (props) => {
                   </div>
                 </div>
               </NavLink>
+              <span className="list-group-item" onClick={logout} style={{
+                cursor: 'pointer'
+              }}>
+                <i className="fe-icon-user text-muted"></i>Déconnexion
+              </span>
             </nav>
           </div>
         </div>

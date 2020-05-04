@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useRef } from "react";
 import { Link } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
 import TextField from "@material-ui/core/TextField";
@@ -20,21 +20,34 @@ const Login = (props) => {
 	const [error, setError] = useState(null);
 	const {id} = props.match.params;
 
+	const interval = useRef(null);
+
 	useEffect(() => {
 		if(localStorage.getItem('token')) {
 			props.history.push(`/account/profile/${id}`);
 		}
-		setLoader(true);
-		axios.get(`/api/client/get/${id}`)
-		.then(({data}) => {
-			setEmail(data.client.email);
-			setPassword(data.client.societe);
-			setToken(data.client.token);
-			setLoader(false);
-		}).catch(error => {
-			setError(error);
-			setLoader(false);
-		})
+		else {
+			setLoader(true);
+			axios.get(`/api/client/get/${id}`)
+			.then(({data}) => {
+				setEmail(data.client.email);
+				setToken(data.client.token);
+				setLoader(false);
+			}).catch(error => {
+				setError(error);
+				setLoader(false);
+			})
+		}
+		interval.current = setInterval(() => {
+			if (localStorage.getItem('expirationDate')) {
+				let time = localStorage.getItem('expirationDate');
+				let currentTime = new Date().getTime();
+				if (currentTime >= time) {
+					localStorage.removeItem('user');
+					localStorage.removeItem('expirationDate');
+				}
+			}
+		}, 1000);
 	}, [])
 
 	const login = (email, password) => {
@@ -47,6 +60,7 @@ const Login = (props) => {
 			console.log(data);
 			setLoader(false);
 			localStorage.setItem('user', token);
+			localStorage.setItem('expirationDate', new Date().getTime() + (1800 * 1000))
 			props.history.push(`/account/profile/${id}`);
 		}).catch(error => {
 			setError(error);

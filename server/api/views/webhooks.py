@@ -27,13 +27,37 @@ def webhooks_view(request):
         return HttpResponse(status=400)
 
     #Handle Event
+    if event.type == 'invoice.created':
+        invoice = event.data.object
+        client = Client.objects.get(customer_id=invoice.customer)
+        client.statut = 'R'
+        client.save()
+        info = None
+        if client.iban:
+            info = client.iban
+        else: 
+            info = client.card
+        content = f'{datetime.fromtimestamp(invoice.created)} - {client.societe} - Demande de prélèvement pourble compte {info} {invoice.number}'
+        notification = Notification(content=content)
+        notification.save()
+        send_mail('Staut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
+    elif event.type == 'invoice.payment_succeeded':
+        print("Invoice payment succceeded")
+        invoice = event.data.object
+        client = Client.objects.get(customer_id=invoice.customer)
+        client.statut = 'R'
+        client.save()
+        content = f'{datetime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Paiement OK'
+        notification = Notification(content=content)
+        notification.save()
+        send_mail('Staut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
     if event.type == 'invoice.payment_succeeded':
         print("Invoice payment succceeded")
         invoice = event.data.object
-        client = Client.get(customer_id=invoice.customer)
+        client = Client.objects.get(customer_id=invoice.customer)
         client.statut = 'R'
         client.save()
-        content = f'{datatime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Paiement OK'
+        content = f'{datetime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Paiement OK'
         notification = Notification(content=content)
         notification.save()
         send_mail('Staut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
@@ -43,7 +67,7 @@ def webhooks_view(request):
         client = Client.objects.get(customer_id=customer_id)
         client.statut = 'N'
         client.save()
-        content = f'{datatime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Echec Paiement'
+        content = f'{datetime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Echec Paiement'
         notification = Notification(content=content)
         notification.save()
     elif event.type == 'charge.succeeded':
@@ -58,7 +82,7 @@ def webhooks_view(request):
         new_date = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600))
         client.date_reglement = datetime.fromtimestamp(new_date)
         client.save()
-        content = f'{datatime.fromtimestamp(payment_intent.created)} - {client.societe} - Retour API concernant la transaction {payment_intent.number} Echec'
+        content = f'{datetime.fromtimestamp(payment_intent.created)} - {client.societe} - Retour API concernant la transaction {payment_intent.number} Echec'
         notification = Notification(content=content)
         notification.save()
     elif event.type == 'payment_intent.created':
@@ -69,7 +93,7 @@ def webhooks_view(request):
         client = Client.objects.get(customer_id=customer_id)
         client.statut = 'N'
         client.save()
-        content = f'{datatime.fromtimestamp(payment_intent.created)} - {client.societe} - Retour API concernant la transaction {payment_intent.number} Echec'
+        content = f'{datetime.fromtimestamp(payment_intent.created)} - {client.societe} - Retour API concernant la transaction {payment_intent.number} Echec'
         notification = Notification(content=content)
         notification.save()
     else:

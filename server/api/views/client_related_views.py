@@ -249,39 +249,40 @@ def set_iban(request):
     autorisation_prelevement = request.data['autorisation_prelevement']
     payment_method_id = request.data['payment_method']
     client = Client.objects.get(id=pk)
-    if client.subscription_id:
-        try:
-            stripe.Subscription.delete(client.subscription_id)
-        except Exception as e:
-            pass
-    payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
-    client.autorisation_prelevement = autorisation_prelevement
-    client.iban = f'{payment_method.sepa_debit.country}{payment_method.sepa_debit.bank_code}*******{payment_method.sepa_debit.last4}'
-    montant = int(client.montant) * 100
-    customer = stripe.Customer.create(
-        email=client.email,
-        payment_method=payment_method.id,
-        invoice_settings={
-            'default_payment_method': payment_method.id
-        }
-    )
-    billing_cycle_anchor = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600)) 
-    trial_end = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600) - (24 * 3600))
-    subscription = stripe.Subscription.create(
-        customer=customer.id,
-        items=[
-            {
-                'plan': client.plan_id
+    if not client.subscription_id:
+        payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
+        client.autorisation_prelevement = autorisation_prelevement
+        client.card_info = ''
+        client.iban = f'{payment_method.sepa_debit.country}{payment_method.sepa_debit.bank_code}*******{payment_method.sepa_debit.last4}'
+        montant = int(client.montant) * 100
+        customer = stripe.Customer.create(
+            email=client.email,
+            payment_method=payment_method.id,
+            invoice_settings={
+                'default_payment_method': payment_method.id
             }
-        ],
-        expand=['latest_invoice.payment_intent'],
-        trial_end=trial_end,
-        billing_cycle_anchor=billing_cycle_anchor
-    )
-    client.date_reglement = datetime.fromtimestamp(billing_cycle_anchor)
-    client.customer_id = customer.id
-    client.subscription_id = subscription.id
-    client.save()
+        )
+        billing_cycle_anchor = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600)) 
+        trial_end = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600) - (24 * 3600))
+        subscription = stripe.Subscription.create(
+            customer=customer.id,
+            items=[
+                {
+                    'plan': client.plan_id
+                }
+            ],
+            expand=['latest_invoice.payment_intent'],
+            trial_end=trial_end,
+            billing_cycle_anchor=billing_cycle_anchor
+        )
+        client.date_reglement = datetime.fromtimestamp(billing_cycle_anchor)
+        client.customer_id = customer.id
+        client.subscription_id = subscription.id
+        client.save()
+    else:
+        return Response({
+            'message': 'Vous avez déjà un abonnement en cours'
+        })
     return Response({
         'message': 'Iban ajouté avec succès'
     })
@@ -299,39 +300,40 @@ def set_card_info(request):
     autorisation_prelevement = request.data['autorisation_prelevement']
     payment_method_id = request.data['payment_method']
     client = Client.objects.get(id=pk)
-    if client.subscription_id:
-        try:
-            stripe.Subscription.delete(client.subscription_id)
-        except Exception as e:
-            pass
-    payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
-    client.card_info = f'{payment_method.card.brand} ******************{payment_method.card.last4}'
-    client.autorisation_prelevement = autorisation_prelevement
-    montant = int(client.montant) * 100
-    customer = stripe.Customer.create(
-        email=client.email,
-        payment_method=payment_method.id,
-        invoice_settings={
-            'default_payment_method': payment_method.id
-        }
-    )
-    billing_cycle_anchor = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600)) 
-    trial_end = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600) - (24 * 3600))
-    subscription = stripe.Subscription.create(
-        customer=customer.id,
-        items=[
-            {
-                'plan': client.plan_id
+    if not client.subscription_id:
+        payment_method = stripe.PaymentMethod.retrieve(payment_method_id)
+        client.iban = ''
+        client.card_info = f'{payment_method.card.brand} ******************{payment_method.card.last4}'
+        client.autorisation_prelevement = autorisation_prelevement
+        montant = int(client.montant) * 100
+        customer = stripe.Customer.create(
+            email=client.email,
+            payment_method=payment_method.id,
+            invoice_settings={
+                'default_payment_method': payment_method.id
             }
-        ],
-        expand=['latest_invoice.payment_intent'],
-        trial_end=trial_end,
-        billing_cycle_anchor=billing_cycle_anchor
-    )
-    client.date_reglement = datetime.fromtimestamp(billing_cycle_anchor)
-    client.customer_id = customer.id
-    client.subscription_id = subscription.id
-    client.save()
+        )
+        billing_cycle_anchor = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600)) 
+        trial_end = int(client.date_reglement.timestamp() + (DAYS[client.periodicite] * 24 * 3600) - (24 * 3600))
+        subscription = stripe.Subscription.create(
+            customer=customer.id,
+            items=[
+                {
+                    'plan': client.plan_id
+                }
+            ],
+            expand=['latest_invoice.payment_intent'],
+            trial_end=trial_end,
+            billing_cycle_anchor=billing_cycle_anchor
+        )
+        client.date_reglement = datetime.fromtimestamp(billing_cycle_anchor)
+        client.customer_id = customer.id
+        client.subscription_id = subscription.id
+        client.save()
+    else: 
+        return Response({
+            'message': 'Vous avez déjà un abonnement en cours'
+        })
     return Response({
         'message': 'Carte Bancaire ajouté avec succès'
     })
