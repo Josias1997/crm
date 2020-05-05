@@ -38,7 +38,7 @@ EMAIL_HOST_USER = 'kologojosias@gmail.com'
 EMAIL_HOST_PASSWORD = 'kingjosias'
 EMAIL_PORT = 587
 
-CLIENT_URL = 'http://localhost:3000'
+CLIENT_URL = 'http://213.32.78.171:3000'
 
 
 # Application definition
@@ -102,8 +102,8 @@ DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'CRM',
-        'USER': 'root',
-        'PASSWORD': 'root',
+        'USER': 'admin',
+        'PASSWORD': 'admin',
         'HOST': 'db',
         'PORT': '3306',
         'OPTIONS': {                                                                           

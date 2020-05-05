@@ -6,6 +6,7 @@ from django.http import HttpResponse
 import stripe
 from django.conf import settings
 from django.core.mail import send_mail
+from datetime import datetime
 
 @csrf_exempt
 @api_view(['POST'])
@@ -40,7 +41,7 @@ def webhooks_view(request):
         content = f'{datetime.fromtimestamp(invoice.created)} - {client.societe} - Demande de prélèvement pourble compte {info} {invoice.number}'
         notification = Notification(content=content)
         notification.save()
-        send_mail('Staut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
+        send_mail('Statut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
     elif event.type == 'invoice.payment_succeeded':
         print("Invoice payment succceeded")
         invoice = event.data.object
@@ -50,7 +51,7 @@ def webhooks_view(request):
         content = f'{datetime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Paiement OK'
         notification = Notification(content=content)
         notification.save()
-        send_mail('Staut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
+        send_mail('Statut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
     if event.type == 'invoice.payment_succeeded':
         print("Invoice payment succceeded")
         invoice = event.data.object
@@ -60,7 +61,7 @@ def webhooks_view(request):
         content = f'{datetime.fromtimestamp(invoice.created)} - {client.societe} - Retour API concernant la transaction {invoice.number} Paiement OK'
         notification = Notification(content=content)
         notification.save()
-        send_mail('Staut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
+        send_mail('Statut Paiement', notification.content, settings.EMAIL_HOST_USER, [settings.EMAIL_HOST_USER], fail_silently=False)
     elif event.type == 'invoice.payment_failed':
         invoice = event.data['object']
         customer_id = invoice['customer']
